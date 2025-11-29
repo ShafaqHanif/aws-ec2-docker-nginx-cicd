@@ -1,0 +1,10 @@
+# Node / Python / OS stuff if any
+*.log
+*.tmp
+*.swp
+*.DS_Store
+
+# Docker stuff
+docker-compose.override.yml
+*.env
+
