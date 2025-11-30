@@ -2,30 +2,28 @@ name: Deploy to EC2
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-    - name: Copy SSH key
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/github_action_key
+          chmod 600 ~/.ssh/github_action_key
 
-    - name: SSH and deploy
-      uses: appleboy/ssh-action@v0.1.6
-      with:
-        host:98.92.17.79
-        username: ubuntu
-        key: ${{ secrets.EC2_SSH_KEY }}
-        script: |
-          cd ~/aws-ec2-docker-nginx-cicd
-          sudo docker-compose down
-          sudo docker-compose up -d
+      - name: Deploy with SSH
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/github_action_key ubuntu@98.92.17.79 "
+            cd ~/aws-ec2-docker-nginx-cicd &&
+            git pull &&
+            sudo docker-compose down &&
+            sudo docker-compose up -d --build
+          "
+
